@@ -1,0 +1,215 @@
+# .cursorrules
+#
+# Primordial Elemental Tic-Tac-Toe
+# --------------------------------
+# This file serves as the comprehensive specification for the Primordial Elemental Tic-Tac-Toe game,
+# detailing the rules, technical architecture, technologies, and implementation guidelines. It is
+# designed to be easily maintainable, versionable, and extensible. All code references, constants,
+# and rule variations must be documented in this file or in the associated .md documents.
+#
+# Table of Contents
+# 1. Introduction
+# 2. Architecture & Technologies
+# 3. Configuration File (gameConfig.ts)
+# 4. Application Flow
+# 5. Game Mechanics & Rules
+#   5.1 Order of Effects
+#   5.2 Lineups & Scoring
+#   5.3 Exclusion Zone
+#   5.4 Spread Effect
+#   5.5 Bonuses
+# 6. End of Game
+# 7. Proposed Symbols
+# 8. Scalability & Documentation
+# 9. Versioning & Changelog
+
+################################################################################
+# 1. INTRODUCTION
+################################################################################
+# Primordial Elemental Tic-Tac-Toe is an upgraded version of Tic-Tac-Toe played on
+# a 9×9 grid (default), where players compete to align their elemental symbols and
+# accumulate points. Each alignment or bonus triggers additional effects, ensuring
+# deep and dynamic gameplay.
+
+################################################################################
+# 2. ARCHITECTURE & TECHNOLOGIES
+################################################################################
+# - Framework: React (TypeScript)
+# - Main Language: TypeScript (front-end logic, game mechanics)
+# - Proposed project structure (recommendation):
+#   ├── src
+#   │   ├── components
+#   │   │   ├── Board.tsx         # Main component rendering the board
+#   │   │   ├── Cell.tsx          # Component for each cell
+#   │   │   ├── Lobby.tsx         # Waiting/invitation page
+#   │   │   ├── HomePage.tsx      # Fun and thematic home page
+#   │   │   └── ...               # Other reusable components
+#   │   ├── core
+#   │   │   ├── gameLogic.ts      # Main game rules (placements, alignments, etc.)
+#   │   │   ├── spreadEffect.ts   # Logic for the Spread effect
+#   │   │   ├── scoring.ts        # Scoring and points management
+#   │   │   └── ...
+#   │   ├── config
+#   │   │   └── gameConfig.ts     # Centralized configuration file (see §3)
+#   │   └── utils
+#   │       └── helpers.ts        # Utility/helper functions
+#   ├── docs
+#   │   ├── gameLogic.md          # Detailed documentation of game logic
+#   │   ├── spreadEffect.md       # Detailed documentation of the Spread effect
+#   │   └── ...
+#   └── package.json
+#
+# - Each major module (e.g. gameLogic, spreadEffect) has its own .md documentation
+#   in the “docs” folder, covering its purpose and main functions.
+# - The code should include explanatory comments at the beginning (purpose, usage)
+#   and within important functions.
+
+################################################################################
+# 3. CONFIGURATION FILE (gameConfig.ts)
+################################################################################
+# All parameters and constants required to configure and adjust gameplay are
+# defined here. Whenever a new global constant is introduced, it must be placed
+# in this file. Example fields:
+#
+#  - GRID_SIZE: number (default 9; can be changed to vary board size)
+#  - MAX_SCORE: number (default 12; the threshold to trigger game-end checks)
+#  - SCORE_DIFFERENCE_FOR_WIN: number (default 5; minimum gap to confirm victory)
+#  - SYMBOLS: string[] (list of possible symbols; e.g. ["🔥","💧","💨","🌍"])
+#  - MAX_DEFINITIVE_SYMBOLS: number (limit for definitive symbols per player)
+#  - MAX_BOOSTED_SYMBOLS: number (limit for boosted symbols per player)
+#  - POINTS_FOR_THREE: number (default 1; points for 3-in-a-row)
+#  - POINTS_FOR_FOUR: number (default 2; points for 4-in-a-row)
+#  - POINTS_FOR_FIVE: number (default 3; points for 5-in-a-row)
+#  - SPREAD_LIMIT_PER_TURN: number (max successive Spread activations in one turn)
+#  - BONUS_CREATION_PROBABILITIES: object/array (e.g. { point:0.50, removeOpponent:0.30, spread:0.15, boostedSymbol:0.05 })
+#  - ZONE_EXCLUSION_DURATION: number (in turns; how long a 5-in-a-row zone is blocked)
+#  - ...
+#
+# All default values must be documented in-gameConfig.ts. 
+# The code reading these values should remain flexible to accommodate variants.
+
+################################################################################
+# 4. APPLICATION FLOW
+################################################################################
+# 4.1 Home Page
+#   - The entry point: a themed landing screen introducing the game setting and
+#     presenting two buttons: “1v1” and “1v1v1” (icons or symbols can replace the “1”).
+#   - The user selects the desired mode to create/join a game.
+#
+# 4.2 Lobby/Waiting Page
+#   - After clicking “1v1” or “1v1v1,” the player is taken to a lobby page.
+#   - A unique invitation link is automatically copied to the user’s clipboard.
+#   - Displays the connected players. The game starts as soon as all required players join.
+#
+# 4.3 Starting the Game
+#   - Symbols are randomly assigned to each player, ensuring uniqueness.
+#   - The board is initialized empty with GRID_SIZE (default 9×9).
+#   - Score counters start at zero; relevant config parameters (MAX_SCORE, etc.) are loaded.
+#
+# 4.4 Game in Progress
+#   - Players place their symbols in turn.
+#   - The underlying logic checks for alignments or special effects after each placement.
+
+################################################################################
+# 5. GAME MECHANICS & RULES
+################################################################################
+
+# 5.1 ORDER OF EFFECTS (after a symbol is placed)
+#   1. Detect lineups (3, 4, or 5 in a row) in rows, columns, or diagonals.
+#   2. For each lineup:
+#       a) Award points based on lineup length (see §5.2).
+#       b) Remove the aligned symbols (except definitive ones).
+#       c) Place bonuses and definitive/boosted symbols as needed.
+#       d) If it’s a 5-symbol lineup, activate the exclusion zone on those squares.
+#   3. Trigger the Spread effect if any (see §5.4), observing SPREAD_LIMIT_PER_TURN.
+#   4. Check if new lineups form because of Spread placements or boosted interactions.
+#   5. Repeat steps 2–4 until no new lineups appear.
+#   6. Check for any player’s score ≥ MAX_SCORE. If so, compare their score to the others:
+#       - If the score gap ≥ SCORE_DIFFERENCE_FOR_WIN, that player wins immediately.
+#       - Otherwise, continue the game.
+#   7. If no winner emerges, end the turn and move to the next player.
+
+# 5.2 LINEUPS & SCORING
+#   - 3 symbols in a row => POINTS_FOR_THREE (default 1 point)
+#   - 4 symbols in a row => POINTS_FOR_FOUR (default 2 points)
+#   - 5 symbols in a row => POINTS_FOR_FIVE (default 3 points)
+#
+#   5.2.1. Consequences of Lineups
+#       - 3-in-a-row:
+#           - Remove the 3 aligned symbols.
+#           - 2 of those squares (randomly) get bonuses.
+#           - The last square gets a definitive symbol of the scoring player.
+#       - 4-in-a-row:
+#           - Remove the 4 aligned symbols.
+#           - 3 squares (randomly) get bonuses.
+#           - 1 square gets a boosted definitive symbol.
+#       - 5-in-a-row:
+#           - Remove the 5 aligned symbols.
+#           - 2 boosted definitive symbols appear on 2 of those squares (random).
+#           - Trigger the Spread effect 2 times for the scoring player.
+#           - Activate an exclusion zone on these 5 squares for ZONE_EXCLUSION_DURATION.
+
+# 5.3 EXCLUSION ZONE
+#   - The squares involved in a 5-in-a-row become blocked for ZONE_EXCLUSION_DURATION turns.
+#   - Neither normal placements nor Spread-generated symbols can occupy these squares
+#     during that period.
+
+# 5.4 SPREAD EFFECT
+#   - When triggered, a symbol (of the player who initiated the effect) is placed:
+#       1) On a free square adjacent to any existing symbol of that player.
+#       2) If no adjacent square is free, place it randomly on a free square outside the exclusion zone.
+#   - Boosted Symbol Interaction:
+#       - If a newly placed symbol is adjacent to a boosted definitive symbol of the same player,
+#         it spawns an additional symbol on a random free square. This can chain further
+#         alignments (re-check lineups).
+
+# 5.5 BONUSES
+#   - Placed on squares when certain lineups occur.
+#   - A bonus is activated when a player places a symbol on that square.
+#   - Potential bonus effects (with example probabilities):
+#       1) +1 immediate point
+#       2) Remove one opponent’s (non-definitive) symbol at random
+#       3) Trigger an additional Spread
+#       4) Create a boosted symbol (5% chance)
+#   - If the square is occupied by a definitive or boosted symbol, the bonus is ignored.
+
+################################################################################
+# 6. END OF GAME
+################################################################################
+# - Whenever a player reaches or surpasses MAX_SCORE (default 12):
+#   - Check the score gap with the next highest-scoring player.
+#   - If the gap ≥ SCORE_DIFFERENCE_FOR_WIN (default 5), that player wins outright.
+#   - Otherwise, the game continues until the gap is sufficient or another condition arises
+#     (e.g., optional turn limit).
+
+################################################################################
+# 7. PROPOSED SYMBOLS
+################################################################################
+# - Default set:
+#   - Player 1: 🔥 (Fire)
+#   - Player 2: 💧 (Water)
+#   - Player 3: 💨 (Air)
+#   - Player 4 (optional variant): 🌍 (Earth)
+# - Each player receives a unique symbol randomly when the match begins.
+
+################################################################################
+# 8. SCALABILITY & DOCUMENTATION
+################################################################################
+# - Each module (Board, Cell, gameLogic, spreadEffect, etc.) has a dedicated .md file in /docs.
+# - Provide a header comment in each file explaining its purpose and usage.
+# - Significant functions, classes, or logic blocks require inline comments for clarity.
+# - Any modifications to the rules or constants are mirrored in gameConfig.ts and documented
+#   in the relevant .md file.
+
+################################################################################
+# 9. VERSIONING & CHANGELOG
+################################################################################
+# - Maintain a version number for the game in this file (e.g., "version: 1.0.0").
+# - Document all notable changes under a “Changelog” section with the date, version, and
+#   summary of modifications.
+#
+# version: 1.0.0
+# Changelog:
+#   - 1.0.0 (YYYY-MM-DD): Initial release of .cursorrules specification
+
+# End of .cursorrules
