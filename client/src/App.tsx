@@ -1,9 +1,9 @@
 import React from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
-import HomePage from './components/HomePage';
-import Lobby from './components/Lobby';
-import Game from './components/Game';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './App.css';
+import HomePage from './components/HomePage';
+import Game from './components/Game';
+import Lobby from './components/Lobby';
 
 function App() {
   return (
@@ -19,4 +19,4 @@ function App() {
   );
 }
 
-export default App;
+export default App; 

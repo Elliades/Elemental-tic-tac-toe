@@ -95,9 +95,9 @@ export const startGame = (gameId: string, gameState: GameState): Promise<{ succe
 /**
  * Update game state
  */
-export const updateGameState = (gameId: string, gameState: GameState): Promise<{ success: boolean, error?: string }> => {
+export const updateGameState = (gameId: string, gameState: GameState, playerId: string): Promise<{ success: boolean, error?: string, currentState?: GameState }> => {
   return new Promise((resolve) => {
-    initSocket().emit('updateGameState', { gameId, gameState }, (response: any) => {
+    initSocket().emit('updateGameState', { gameId, gameState, playerId }, (response: any) => {
       resolve(response);
     });
   });
