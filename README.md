@@ -70,18 +70,38 @@ The game will be available at `http://localhost:3000`, and the server will run o
 ## Development
 
 ### Project Structure
-\`\`\`
-elemental-morpion/
-├── src/
-│   ├── components/     # React components
-│   ├── core/          # Game logic
-│   ├── config/        # Game configuration
-│   ├── services/      # Backend communication
-│   ├── types/         # TypeScript types
-│   └── utils/         # Utility functions
-├── server/            # Express.js backend
-└── public/            # Static assets
-\`\`\`
+
+```plaintext
+├── client                    # Frontend React application
+│   ├── public               # Static files
+│   │   ├── index.html      # HTML entry point
+│   │   └── ...             # Other public assets
+│   ├── src
+│   │   ├── components      # React components
+│   │   │   ├── Board.tsx   # Main board component
+│   │   │   ├── Cell.tsx    # Cell component
+│   │   │   ├── Game.tsx    # Game component
+│   │   │   ├── Lobby.tsx   # Waiting/invitation page
+│   │   │   └── HomePage.tsx # Thematic home page
+│   │   ├── core            # Game core logic
+│   │   │   ├── gameLogic.ts      # Main game rules
+│   │   │   ├── spreadEffect.ts   # Spread effect logic
+│   │   │   └── scoring.ts        # Scoring management
+│   │   ├── config          # Configuration files
+│   │   │   └── gameConfig.ts     # Game settings
+│   │   ├── services        # API/Socket services
+│   │   ├── types          # TypeScript type definitions
+│   │   └── utils          # Utility functions
+│   ├── package.json       # Client dependencies
+│   └── tsconfig.json      # TypeScript configuration
+├── server                  # Backend Node.js server
+│   ├── server.js          # Express server setup
+│   └── package.json       # Server dependencies
+├── docs                   # Documentation
+│   ├── gameLogic.md      # Game logic documentation
+│   └── spreadEffect.md   # Spread effect documentation
+└── package.json          # Root workspace configuration
+```
 
 ### Available Scripts
 

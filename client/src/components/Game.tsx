@@ -69,6 +69,7 @@ const Game: React.FC = () => {
     onGameStateUpdate((updatedGameState) => {
       if (updatedGameState) {
         console.log(`Real-time update received for game ${gameId}`);
+        console.log(`Current turn: Player ${updatedGameState.currentPlayerId}`);
         setGameState(updatedGameState);
       }
     });
@@ -113,14 +114,30 @@ const Game: React.FC = () => {
       }
       
       // Place the symbol and get the updated game state
-      const updatedGameState = placeSymbol(gameState, position);
+      const updatedGameState = placeSymbol({...gameState}, position);
+      
+      // Update local state immediately to provide instant feedback to the current player
+      setGameState(updatedGameState);
       
       // Update game state in the backend
-      const response = await updateGameState(gameId, updatedGameState);
+      const response = await updateGameState(gameId, updatedGameState, currentPlayerId);
       if (response.success) {
         console.log(`Game state updated in backend after move`);
       } else {
         console.error(`Failed to update game state: ${response.error}`);
+        
+        // If the update failed due to turn validation or other issues,
+        // revert to the server's version of the state
+        if (response.currentState) {
+          console.log("Reverting to server's game state");
+          setGameState(response.currentState);
+        } else {
+          // Fallback to fetching the latest state
+          const latestState = await getGameState(gameId);
+          if (latestState) {
+            setGameState(latestState);
+          }
+        }
       }
     } catch (err) {
       console.error('Error during move:', err);
@@ -132,7 +149,7 @@ const Game: React.FC = () => {
   };
 
   const handleStartNewGame = async () => {
-    if (!gameState || !gameId) return;
+    if (!gameState || !gameId || !currentPlayerId) return;
     
     try {
       // Reset scores but keep the same players
@@ -168,7 +185,7 @@ const Game: React.FC = () => {
       };
       
       // Update game state in the backend
-      const response = await updateGameState(gameId, newGameState);
+      const response = await updateGameState(gameId, newGameState, currentPlayerId);
       if (response.success) {
         console.log(`New game started in backend`);
       } else {

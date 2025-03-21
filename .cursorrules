@@ -1,215 +1,274 @@
-# .cursorrules
-#
-# Primordial Elemental Tic-Tac-Toe
-# --------------------------------
-# This file serves as the comprehensive specification for the Primordial Elemental Tic-Tac-Toe game,
-# detailing the rules, technical architecture, technologies, and implementation guidelines. It is
-# designed to be easily maintainable, versionable, and extensible. All code references, constants,
-# and rule variations must be documented in this file or in the associated .md documents.
-#
-# Table of Contents
-# 1. Introduction
-# 2. Architecture & Technologies
-# 3. Configuration File (gameConfig.ts)
-# 4. Application Flow
-# 5. Game Mechanics & Rules
-#   5.1 Order of Effects
-#   5.2 Lineups & Scoring
-#   5.3 Exclusion Zone
-#   5.4 Spread Effect
-#   5.5 Bonuses
-# 6. End of Game
-# 7. Proposed Symbols
-# 8. Scalability & Documentation
-# 9. Versioning & Changelog
+# Primordial Elemental Tic-Tac-Toe Rules
 
-################################################################################
-# 1. INTRODUCTION
-################################################################################
-# Primordial Elemental Tic-Tac-Toe is an upgraded version of Tic-Tac-Toe played on
-# a 9×9 grid (default), where players compete to align their elemental symbols and
-# accumulate points. Each alignment or bonus triggers additional effects, ensuring
-# deep and dynamic gameplay.
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Architecture & Technologies](#architecture--technologies)
+3. [Configuration File (gameConfig.ts)](#configuration-file-gameconfigts)
+4. [Application Flow](#application-flow)
+5. [Game Mechanics & Rules](#game-mechanics--rules)
+    - 5.1 [Order of Effects](#order-of-effects)
+    - 5.2 [Lineups & Scoring](#lineups--scoring)
+    - 5.3 [Exclusion Zone](#exclusion-zone)
+    - 5.4 [Spread Effect](#spread-effect)
+    - 5.5 [Bonuses](#bonuses)
+6. [End of Game](#end-of-game)
+7. [Proposed Symbols](#proposed-symbols)
+8. [Scalability & Documentation](#scalability--documentation)
+9. [Versioning & Changelog](#versioning--changelog)
+10. [Environment](#10-environment)
+---
 
-################################################################################
-# 2. ARCHITECTURE & TECHNOLOGIES
-################################################################################
-# - Framework: React (TypeScript)
-# - Main Language: TypeScript (front-end logic, game mechanics)
-# - Proposed project structure (recommendation):
-#   ├── src
-#   │   ├── components
-#   │   │   ├── Board.tsx         # Main component rendering the board
-#   │   │   ├── Cell.tsx          # Component for each cell
-#   │   │   ├── Lobby.tsx         # Waiting/invitation page
-#   │   │   ├── HomePage.tsx      # Fun and thematic home page
-#   │   │   └── ...               # Other reusable components
-#   │   ├── core
-#   │   │   ├── gameLogic.ts      # Main game rules (placements, alignments, etc.)
-#   │   │   ├── spreadEffect.ts   # Logic for the Spread effect
-#   │   │   ├── scoring.ts        # Scoring and points management
-#   │   │   └── ...
-#   │   ├── config
-#   │   │   └── gameConfig.ts     # Centralized configuration file (see §3)
-#   │   └── utils
-#   │       └── helpers.ts        # Utility/helper functions
-#   ├── docs
-#   │   ├── gameLogic.md          # Detailed documentation of game logic
-#   │   ├── spreadEffect.md       # Detailed documentation of the Spread effect
-#   │   └── ...
-#   └── package.json
-#
-# - Each major module (e.g. gameLogic, spreadEffect) has its own .md documentation
-#   in the “docs” folder, covering its purpose and main functions.
-# - The code should include explanatory comments at the beginning (purpose, usage)
-#   and within important functions.
+## 1. Introduction
+Primordial Elemental Tic-Tac-Toe is an enhanced version of Tic-Tac-Toe played on a default 9×9 grid. Players compete to align their elemental symbols and accumulate points. Alignments and bonuses trigger additional effects, creating deep and dynamic gameplay.
 
-################################################################################
-# 3. CONFIGURATION FILE (gameConfig.ts)
-################################################################################
-# All parameters and constants required to configure and adjust gameplay are
-# defined here. Whenever a new global constant is introduced, it must be placed
-# in this file. Example fields:
-#
-#  - GRID_SIZE: number (default 9; can be changed to vary board size)
-#  - MAX_SCORE: number (default 12; the threshold to trigger game-end checks)
-#  - SCORE_DIFFERENCE_FOR_WIN: number (default 5; minimum gap to confirm victory)
-#  - SYMBOLS: string[] (list of possible symbols; e.g. ["🔥","💧","💨","🌍"])
-#  - MAX_DEFINITIVE_SYMBOLS: number (limit for definitive symbols per player)
-#  - MAX_BOOSTED_SYMBOLS: number (limit for boosted symbols per player)
-#  - POINTS_FOR_THREE: number (default 1; points for 3-in-a-row)
-#  - POINTS_FOR_FOUR: number (default 2; points for 4-in-a-row)
-#  - POINTS_FOR_FIVE: number (default 3; points for 5-in-a-row)
-#  - SPREAD_LIMIT_PER_TURN: number (max successive Spread activations in one turn)
-#  - BONUS_CREATION_PROBABILITIES: object/array (e.g. { point:0.50, removeOpponent:0.30, spread:0.15, boostedSymbol:0.05 })
-#  - ZONE_EXCLUSION_DURATION: number (in turns; how long a 5-in-a-row zone is blocked)
-#  - ...
-#
-# All default values must be documented in-gameConfig.ts. 
-# The code reading these values should remain flexible to accommodate variants.
+## 2. Architecture & Technologies
+- **Framework:** React (TypeScript)
+- **Main Language:** TypeScript (front-end logic, game mechanics)
+- **Server:** Node.js with Express and Socket.IO
+- **Project Structure:**
+(not updated yet)
+```plaintext
+├── client                    # Frontend React application
+│   ├── public               # Static files
+│   │   ├── index.html      # HTML entry point
+│   │   └── ...             # Other public assets
+│   ├── src
+│   │   ├── components      # React components
+│   │   │   ├── Board.tsx   # Main board component
+│   │   │   ├── Cell.tsx    # Cell component
+│   │   │   ├── Game.tsx    # Game component
+│   │   │   ├── Lobby.tsx   # Waiting/invitation page
+│   │   │   └── HomePage.tsx # Thematic home page
+│   │   ├── core            # Game core logic
+│   │   │   ├── gameLogic.ts      # Main game rules
+│   │   │   ├── spreadEffect.ts   # Spread effect logic
+│   │   │   └── scoring.ts        # Scoring management
+│   │   ├── config          # Configuration files
+│   │   │   └── gameConfig.ts     # Game settings
+│   │   ├── services        # API/Socket services
+│   │   ├── types          # TypeScript type definitions
+│   │   └── utils          # Utility functions
+│   ├── package.json       # Client dependencies
+│   └── tsconfig.json      # TypeScript configuration
+├── server                  # Backend Node.js server
+│   ├── server.js          # Express server setup
+│   └── package.json       # Server dependencies
+├── docs                   # Documentation
+│   ├── gameLogic.md      # Game logic documentation
+│   └── spreadEffect.md   # Spread effect documentation
+└── package.json          # Root workspace configuration
+```
 
-################################################################################
-# 4. APPLICATION FLOW
-################################################################################
-# 4.1 Home Page
-#   - The entry point: a themed landing screen introducing the game setting and
-#     presenting two buttons: “1v1” and “1v1v1” (icons or symbols can replace the “1”).
-#   - The user selects the desired mode to create/join a game.
-#
-# 4.2 Lobby/Waiting Page
-#   - After clicking “1v1” or “1v1v1,” the player is taken to a lobby page.
-#   - A unique invitation link is automatically copied to the user’s clipboard.
-#   - Displays the connected players. The game starts as soon as all required players join.
-#
-# 4.3 Starting the Game
-#   - Symbols are randomly assigned to each player, ensuring uniqueness.
-#   - The board is initialized empty with GRID_SIZE (default 9×9).
-#   - Score counters start at zero; relevant config parameters (MAX_SCORE, etc.) are loaded.
-#
-# 4.4 Game in Progress
-#   - Players place their symbols in turn.
-#   - The underlying logic checks for alignments or special effects after each placement.
+- **Development Environment:** 
+  - Node.js (version 14.x or higher)
+  - npm for package management
+  - Concurrent development setup for client and server
 
-################################################################################
-# 5. GAME MECHANICS & RULES
-################################################################################
+- **Key Dependencies:**
+  - Client:
+    - React 18.x
+    - TypeScript 4.x
+    - React Router 6.x
+    - Socket.IO Client 4.x
+  - Server:
+    - Express 4.x
+    - Socket.IO 4.x
+    - Nodemon (development)
 
-# 5.1 ORDER OF EFFECTS (after a symbol is placed)
-#   1. Detect lineups (3, 4, or 5 in a row) in rows, columns, or diagonals.
-#   2. For each lineup:
-#       a) Award points based on lineup length (see §5.2).
-#       b) Remove the aligned symbols (except definitive ones).
-#       c) Place bonuses and definitive/boosted symbols as needed.
-#       d) If it’s a 5-symbol lineup, activate the exclusion zone on those squares.
-#   3. Trigger the Spread effect if any (see §5.4), observing SPREAD_LIMIT_PER_TURN.
-#   4. Check if new lineups form because of Spread placements or boosted interactions.
-#   5. Repeat steps 2–4 until no new lineups appear.
-#   6. Check for any player’s score ≥ MAX_SCORE. If so, compare their score to the others:
-#       - If the score gap ≥ SCORE_DIFFERENCE_FOR_WIN, that player wins immediately.
-#       - Otherwise, continue the game.
-#   7. If no winner emerges, end the turn and move to the next player.
+- **Development Scripts:**
+  - `npm run dev`: Start both client and server concurrently
+  - `npm run client`: Start React development server
+  - `npm run server`: Start Node.js server with hot reload
+  - `npm run install-all`: Install dependencies for both client and server
 
-# 5.2 LINEUPS & SCORING
-#   - 3 symbols in a row => POINTS_FOR_THREE (default 1 point)
-#   - 4 symbols in a row => POINTS_FOR_FOUR (default 2 points)
-#   - 5 symbols in a row => POINTS_FOR_FIVE (default 3 points)
-#
-#   5.2.1. Consequences of Lineups
-#       - 3-in-a-row:
-#           - Remove the 3 aligned symbols.
-#           - 2 of those squares (randomly) get bonuses.
-#           - The last square gets a definitive symbol of the scoring player.
-#       - 4-in-a-row:
-#           - Remove the 4 aligned symbols.
-#           - 3 squares (randomly) get bonuses.
-#           - 1 square gets a boosted definitive symbol.
-#       - 5-in-a-row:
-#           - Remove the 5 aligned symbols.
-#           - 2 boosted definitive symbols appear on 2 of those squares (random).
-#           - Trigger the Spread effect 2 times for the scoring player.
-#           - Activate an exclusion zone on these 5 squares for ZONE_EXCLUSION_DURATION.
+## 3. Configuration File (gameConfig.ts)
+Defines parameters/constants to configure gameplay. Any new global constant must be added here.
 
-# 5.3 EXCLUSION ZONE
-#   - The squares involved in a 5-in-a-row become blocked for ZONE_EXCLUSION_DURATION turns.
-#   - Neither normal placements nor Spread-generated symbols can occupy these squares
-#     during that period.
+### Example Configuration Fields:
+```typescript
+export const gameConfig = {
+  GRID_SIZE: 9,
+  MAX_SCORE: 12,
+  SCORE_DIFFERENCE_FOR_WIN: 5,
+  SYMBOLS: ["🔥", "💧", "💨", "🌍"],
+  MAX_DEFINITIVE_SYMBOLS: 3,
+  MAX_BOOSTED_SYMBOLS: 2,
+  POINTS_FOR_THREE: 1,
+  POINTS_FOR_FOUR: 2,
+  POINTS_FOR_FIVE: 3,
+  SPREAD_LIMIT_PER_TURN: 2,
+  BONUS_CREATION_PROBABILITIES: { point: 0.50, removeOpponent: 0.30, spread: 0.15, boostedSymbol: 0.05 },
+  ZONE_EXCLUSION_DURATION: 3,
+};
+```
 
-# 5.4 SPREAD EFFECT
-#   - When triggered, a symbol (of the player who initiated the effect) is placed:
-#       1) On a free square adjacent to any existing symbol of that player.
-#       2) If no adjacent square is free, place it randomly on a free square outside the exclusion zone.
-#   - Boosted Symbol Interaction:
-#       - If a newly placed symbol is adjacent to a boosted definitive symbol of the same player,
-#         it spawns an additional symbol on a random free square. This can chain further
-#         alignments (re-check lineups).
+## 4. Application Flow
+1. **Home Page**
+   - Landing screen with options: "1v1" or "1v1v1."
+2. **Lobby/Waiting Page**
+   - Players join via an invitation link.
+   - The game starts when all players are connected.
+3. **Game Start**
+   - Unique symbols assigned to each player.
+   - Score counters initialized at zero.
+4. **Gameplay**
+   - Players take turns placing symbols.
+   - Alignments and special effects are triggered.
 
-# 5.5 BONUSES
-#   - Placed on squares when certain lineups occur.
-#   - A bonus is activated when a player places a symbol on that square.
-#   - Potential bonus effects (with example probabilities):
-#       1) +1 immediate point
-#       2) Remove one opponent’s (non-definitive) symbol at random
-#       3) Trigger an additional Spread
-#       4) Create a boosted symbol (5% chance)
-#   - If the square is occupied by a definitive or boosted symbol, the bonus is ignored.
+## 5. Game Mechanics & Rules
+### 5.1 Order of Effects
+1. Detect alignments (3, 4, or 5 in a row).
+2. Apply lineup effects:
+   - Award points.
+   - Remove aligned symbols (unless definitive).
+   - Assign bonuses.
+   - Activate exclusion zones for 5-in-a-row.
+3. Trigger Spread effect if applicable.
+4. Repeat until no further alignments occur.
+5. Check for winning conditions.
 
-################################################################################
-# 6. END OF GAME
-################################################################################
-# - Whenever a player reaches or surpasses MAX_SCORE (default 12):
-#   - Check the score gap with the next highest-scoring player.
-#   - If the gap ≥ SCORE_DIFFERENCE_FOR_WIN (default 5), that player wins outright.
-#   - Otherwise, the game continues until the gap is sufficient or another condition arises
-#     (e.g., optional turn limit).
+### 5.2 Lineups & Scoring
+| Alignment  | Points  | Effects  |
+|------------|--------|-----------------------------------|
+| 3-in-a-row | 1      | Remove 3, add bonuses & definitive symbol |
+| 4-in-a-row | 2      | Remove 4, add bonuses & boosted symbol |
+| 5-in-a-row | 3      | Remove 5, trigger Spread, exclusion zone |
 
-################################################################################
-# 7. PROPOSED SYMBOLS
-################################################################################
-# - Default set:
-#   - Player 1: 🔥 (Fire)
-#   - Player 2: 💧 (Water)
-#   - Player 3: 💨 (Air)
-#   - Player 4 (optional variant): 🌍 (Earth)
-# - Each player receives a unique symbol randomly when the match begins.
+### 5.3 Exclusion Zone
+- Triggered by a 5-in-a-row.
+- Blocks squares for `ZONE_EXCLUSION_DURATION` turns.
 
-################################################################################
-# 8. SCALABILITY & DOCUMENTATION
-################################################################################
-# - Each module (Board, Cell, gameLogic, spreadEffect, etc.) has a dedicated .md file in /docs.
-# - Provide a header comment in each file explaining its purpose and usage.
-# - Significant functions, classes, or logic blocks require inline comments for clarity.
-# - Any modifications to the rules or constants are mirrored in gameConfig.ts and documented
-#   in the relevant .md file.
+### 5.4 Spread Effect
+- Places a new symbol adjacent to an existing one.
+- Can trigger new alignments.
+- Limited by `SPREAD_LIMIT_PER_TURN`.
 
-################################################################################
-# 9. VERSIONING & CHANGELOG
-################################################################################
-# - Maintain a version number for the game in this file (e.g., "version: 1.0.0").
-# - Document all notable changes under a “Changelog” section with the date, version, and
-#   summary of modifications.
-#
-# version: 1.0.0
-# Changelog:
-#   - 1.0.0 (YYYY-MM-DD): Initial release of .cursorrules specification
+### 5.5 Bonuses
+- Activated when a player places a symbol on a bonus square.
+- Possible effects:
+  - +1 point
+  - Remove an opponent's symbol
+  - Trigger extra Spread
+  - Create a boosted symbol
 
-# End of .cursorrules
+## 6. End of Game
+- A player wins if they reach `MAX_SCORE` and have a score lead of at least `SCORE_DIFFERENCE_FOR_WIN`.
+- If the lead is insufficient, the game continues.
+
+## 7. Proposed Symbols
+| Player | Symbol | Element |
+|--------|--------|---------|
+| 1      | 🔥    | Fire    |
+| 2      | 💧    | Water   |
+| 3      | 💨    | Air     |
+| 4      | 🌍    | Earth   |
+
+## 8. Scalability & Documentation
+- Each module has a dedicated `.md` file in `docs/`.
+- Inline comments clarify complex logic.
+- Rule modifications must be reflected in `gameConfig.ts` and documented.
+
+## 9. Versioning & Changelog
+- **Version:** 1.0.0
+- **Changelog:**
+  - **1.0.0 (YYYY-MM-DD):** Initial release of the specification.
+
+## 10. Environment 
+- **OS:**
+  - DEV: Windows 11
+  - Prod: Windows 11
+- **Development Environment:** 
+  - Node.js (version 14.x or higher) for running the server and client applications.
+  - npm (Node Package Manager) for managing project dependencies.
+  
+- **Client Environment:**
+  - React (version 17.x or higher) for building the user interface.
+  - TypeScript (version 4.x or higher) for type safety and improved developer experience.
+  - React Router (version 6.x or higher) for handling routing within the application.
+  - Testing Library (React Testing Library) for unit and integration testing of components.
+
+- **Server Environment:**
+  - Express.js for building the server-side application.
+  - WebSocket for real-time communication between players.
+  - MongoDB (or any other database) for storing game states and player data.
+
+- **Build Tools:**
+  - Webpack or Create React App for bundling the client-side application.
+  - Babel for transpiling modern JavaScript and TypeScript code.
+
+- **Version Control:**
+  - Git for version control, with a repository hosted on platforms like GitHub or GitLab.
+
+- **Language and Frameworks:**
+  - Use TypeScript for both frontend and backend development.
+  - Frontend: Utilize React with Next.js for server-side rendering.
+  - Backend: Implement with Node.js and Express.js.
+
+- **Project Structure:**
+  - Organize components, services, and utilities into dedicated directories.
+  - Maintain a clear separation between frontend and backend codebases.
+
+- **Styling:**
+  - Apply Tailwind CSS for consistent and responsive styling.
+  - Follow a mobile-first design approach.
+
+- **State Management:**
+  - Use React's Context API or Redux for managing global state.
+
+- **API Design:**
+  - Develop RESTful APIs with Express.js.
+  - Ensure proper authentication using JWT tokens.
+
+- **Database:**
+  - Utilize MongoDB for data storage.
+  - Implement Mongoose for schema definitions and data modeling.
+
+- **Error Handling:**
+  - Implement centralized error handling middleware in Express.js.
+  - Use try-catch blocks for asynchronous operations.
+
+- **Testing:**
+  - Write unit tests using Jest for both frontend and backend.
+  - Achieve at least 80% test coverage.
+
+- **Version Control:**
+  - Follow the GitFlow branching model.
+  - Write clear and concise commit messages.
+
+- **Code Quality:**
+  - Enforce coding standards using ESLint and Prettier.
+  - Conduct regular code reviews to maintain code quality.
+
+- **Security:**
+  - Validate all user inputs to prevent injection attacks.
+  - Use HTTPS for secure data transmission.
+
+- **Performance Optimization:**
+  - Implement lazy loading for components and images.
+  - Optimize database queries for efficiency.
+
+- **Documentation:**
+  - Maintain comprehensive documentation for all modules and functions.
+  - Use JSDoc for inline code documentation.
+  - Markdown files in the `docs/` directory for maintaining project documentation, including game rules, architecture, and setup instructions.
+
+- **Deployment:**
+  - Deployement is meant to be done on a local server, no cloud.
+  - Use Docker for containerization.
+  - Deploy applications on platforms like Vercel (frontend) and  (backend).
+
+
+# IMPORTANT
+- DO NOT DUPPLICATE CODE, USE EXISTING FILES IF THEY ARE SUITABLE.
+- GAME RULES DOCUMENTATION SHALL BE UPDATED EACH TIME A NEW RULE IS ADDED OR MODIFIED.
+- KEEP THE CODE CLEAN AND EASY TO READ.
+- KEEP THE COMMENTS HELPFUL AND UP TO DATE.
+- KEEP THE COMMIT MESSAGES CLEAR AND CONCISE.
+- KEEP THE CODE WELL STRUCTURED AND MODULAR, EACH COMPONENT SHOULD HAVE A UNIQUE PURPOSE AND BE WELL DOCUMENTED.
+- DOCUMENT THE FLOW OF THE ARCHITECTURE AND THE LOGIC OF THE GAME IN A DEDICATED DOCUMENT.
+- WRITE ALL SCENARIOS FOR THE GAME IN A DEDICATED DOCUMENT.
+- KEEP THE CODE WELL DOCUMENTED.
+- KEEP THE CODE WELL TESTED.
+- PROPOSE NEW TECHNOLOGIES AND SOLUTIONS TO IMPROVE THE CODE AND THE ARCHITECTURE OF THE APPLICATION.
+- ALWAYS CONSIDER THE LONGER TERM IMPLICATIONS OF THE CODE AND THE ARCHITECTURE.
+- WHEN FIXING AN ISSUE, FIND THE ROOT CAUSE AND FIX AND PROPAGATE THE FIX TO ALL THE RELATED FILES.

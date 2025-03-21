@@ -135,6 +135,8 @@ export const placeSymbol = (
     return state;
   }
   
+  console.log(`Player ${currentPlayer.name} (ID: ${currentPlayer.id}) placing symbol at [${row},${col}]`);
+  
   const newBoard = [...state.board];
   
   // Create a deep copy of the cell
@@ -151,7 +153,9 @@ export const placeSymbol = (
   // Apply any existing bonus on the cell
   let newState = {
     ...state,
-    board: newBoard
+    board: newBoard,
+    // Reset spread counter for each new turn
+    spreadActivationsThisTurn: 0
   };
   
   if (cell.hasBonus && cell.bonusType) {
@@ -174,13 +178,15 @@ export const placeSymbol = (
     const currentIndex = newState.players.findIndex(p => p.id === state.currentPlayerId);
     if (currentIndex >= 0) {
       const nextPlayerIndex = (currentIndex + 1) % newState.players.length;
+      const nextPlayerId = newState.players[nextPlayerIndex].id;
+      
+      console.log(`Changing turn: Current player index ${currentIndex} (ID: ${state.currentPlayerId}) → Next player index ${nextPlayerIndex} (ID: ${nextPlayerId})`);
+      
       newState.currentPlayerIndex = nextPlayerIndex;
-      newState.currentPlayerId = newState.players[nextPlayerIndex].id;
+      newState.currentPlayerId = nextPlayerId;
+      console.log(`Turn passed to player ${newState.players[nextPlayerIndex].name} (ID: ${newState.currentPlayerId})`);
     }
   }
-  
-  // Reset spread activations counter for next turn
-  newState.spreadActivationsThisTurn = 0;
   
   return newState;
 };

@@ -138,19 +138,31 @@ io.on('connection', (socket) => {
   // Handle game state updates
   socket.on('updateGameState', (data, callback) => {
     try {
-      const { gameId, gameState } = data;
+      const { gameId, gameState, playerId } = data;
       
       if (!games.has(gameId)) {
         return callback({ success: false, error: 'Game not found' });
       }
 
       const game = games.get(gameId);
+      
+      // Validate that it's the player's turn
+      if (game.gameState && game.gameState.currentPlayerId !== playerId) {
+        console.log(`Turn validation failed: Expected ${game.gameState.currentPlayerId}, got ${playerId}`);
+        return callback({ 
+          success: false, 
+          error: 'Not your turn',
+          currentState: game.gameState // Return current state so client can sync
+        });
+      }
+      
+      // Update the game state
       game.gameState = gameState;
       game.lastUpdated = Date.now();
       games.set(gameId, game);
 
-      // Broadcast the update to all clients except the sender
-      socket.to(gameId).emit('gameStateUpdate', gameState);
+      // Broadcast the update to all clients in the room, including the sender
+      io.to(gameId).emit('gameStateUpdate', gameState);
       
       callback({ success: true });
     } catch (error) {
