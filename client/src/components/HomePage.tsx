@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
       localStorage.setItem('currentPlayerId', playerId);
       
       // Navigate to the lobby
-      navigate(`/lobby/${gameId}?mode=${gameMode}&host=true&valid=true`);
+      navigate(`/join/${gameId}?mode=${gameMode}`);
     } catch (error) {
       console.error("Error creating game:", error);
       alert("Failed to create game. Please try again.");
