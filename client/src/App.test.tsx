@@ -2,8 +2,13 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+// Mock ToastProvider
+jest.mock('./contexts/ToastContext', () => ({
+  ToastProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="toast-provider">{children}</div>
+}));
+
+test('renders the game title', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  const titleElement = screen.getByText(/Primordial Elemental Tic-Tac-Toe/i);
+  expect(titleElement).toBeInTheDocument();
 });

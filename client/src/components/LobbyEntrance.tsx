@@ -5,6 +5,7 @@ import {
   onPlayerUpdate,
   joinGame
 } from '../services/gameService';
+import { useToast } from '../contexts/ToastContext';
 
 const LobbyEntrance: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -23,6 +24,8 @@ const LobbyEntrance: React.FC = () => {
   
   // Number of players needed based on game mode
   const requiredPlayers = gameMode === '1v1' ? 2 : 3;
+  
+  const { showToast } = useToast();
   
   useEffect(() => {
     if (!gameId) {
@@ -45,7 +48,6 @@ const LobbyEntrance: React.FC = () => {
     });
     
     // Request current players in lobby
-    // This would need a new API endpoint on your server
     const fetchLobbyInfo = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_SERVER_URL || 'http://localhost:3001'}/api/games/${gameId}`);
@@ -62,7 +64,10 @@ const LobbyEntrance: React.FC = () => {
         }
       } catch (error) {
         console.error('Error fetching lobby info:', error);
-        // Don't set error state here as the player updates should still come through
+        // Show a toast notification instead of just logging to console
+        showToast(`Error loading lobby data: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
+        // Keep the error state for UI rendering if needed
+        setError('Failed to connect to the game server. Please try again later.');
       }
     };
     
@@ -71,10 +76,11 @@ const LobbyEntrance: React.FC = () => {
     return () => {
       // Socket cleanup handled elsewhere
     };
-  }, [gameId, gameMode]);
+  }, [gameId, gameMode, showToast]);
   
   const handleJoinLobby = async () => {
     if (!gameId || !playerName.trim()) {
+      showToast('Please enter your name to join the lobby', 'warning');
       setError('Please enter your name to join the lobby');
       return;
     }
@@ -94,13 +100,18 @@ const LobbyEntrance: React.FC = () => {
         localStorage.setItem('currentPlayerId', result.playerId || '');
         console.log(`Successfully joined lobby as: ${playerName} with ID: ${result.playerId}`);
         
+        // Display success toast before navigation
+        showToast(`Successfully joined as ${playerName}`, 'success');
+        
         // Navigate to the main lobby
         navigate(`/lobby/${gameId}?mode=${gameMode}&valid=true&host=${result.isHost || false}`);
       } else {
+        showToast(result.error || 'Failed to join lobby', 'error');
         setError(result.error || 'Failed to join lobby');
       }
     } catch (error) {
       console.error('Error joining lobby:', error);
+      showToast(`Connection error: ${error instanceof Error ? error.message : 'Unknown error'}`, 'error');
       setError('Error connecting to the game server');
     } finally {
       setIsJoining(false);

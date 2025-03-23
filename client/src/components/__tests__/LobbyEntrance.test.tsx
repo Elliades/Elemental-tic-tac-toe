@@ -2,12 +2,20 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import LobbyEntrance from '../LobbyEntrance';
+import * as ToastContext from '../../contexts/ToastContext';
 
 // Mock the gameService to prevent actual socket connections in tests
 jest.mock('../../services/gameService', () => ({
   initSocket: jest.fn(() => ({ on: jest.fn() })),
   onPlayerUpdate: jest.fn(),
   joinGame: jest.fn().mockResolvedValue({ success: true, playerId: 'test-id' })
+}));
+
+// Mock the toast context
+jest.mock('../../contexts/ToastContext', () => ({
+  useToast: jest.fn().mockReturnValue({
+    showToast: jest.fn()
+  })
 }));
 
 // Mock fetch for API calls
